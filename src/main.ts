@@ -432,11 +432,11 @@ function update() {
           sfxLevelUp();
           clearTime = performance.now() - startTime;
           cleared = true;
-          const times: number[] = JSON.parse(localStorage.getItem("rainbowrider:t") || "[]");
+          const times: number[] = JSON.parse(localStorage.getItem("rainbowspeed:t") || "[]");
           times.push(clearTime);
           times.sort((a, b) => a - b);
           if (times.length > 5) times.length = 5;
-          localStorage.setItem("rainbowrider:t", JSON.stringify(times));
+          localStorage.setItem("rainbowspeed:t", JSON.stringify(times));
         } else {
           levelUpTimer = 120;
           sfxLevelUp();
@@ -758,7 +758,7 @@ function draw() {
     drawText(`TIME ${formatTime(clearTime)}`, WIDTH / 2, 190, 2, 0.5, "#fff");
     drawText("BEST TIMES", WIDTH / 2, 260, 2, 0.5, "#E679D8");
 
-    const times: number[] = JSON.parse(localStorage.getItem("rainbowrider:t") || "[]");
+    const times: number[] = JSON.parse(localStorage.getItem("rainbowspeed:t") || "[]");
     let highlighted = false;
     for (let i = 0; i < times.length; i++) {
       const color = !highlighted && times[i] === clearTime ? (highlighted = true, "#E679D8") : "#fff";
@@ -800,7 +800,7 @@ function main() {
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
     if (showBestTimes) {
       drawText("BEST TIMES", WIDTH / 2, 200, 3, 0.5, "#E679D8");
-      const times: number[] = JSON.parse(localStorage.getItem("rainbowrider:t") || "[]");
+      const times: number[] = JSON.parse(localStorage.getItem("rainbowspeed:t") || "[]");
       if (times.length === 0) {
         drawText("NO RECORD", WIDTH / 2, 320, 1, 0.5, "#B2C1DB");
       } else {
@@ -814,7 +814,7 @@ function main() {
         drawText("PRESS B TO BACK", WIDTH / 2, 540, 1, 0.5, "#B2C1DB");
       }
     } else {
-      drawText("RAINBOW RIDER", WIDTH / 2, 200, 3, 0.5, "#E679D8");
+      drawText("RAINBOW SPEED", WIDTH / 2, 200, 3, 0.5, "#E679D8");
       if (mobile) {
         drawText("MOVE : TAP R OR L", WIDTH / 2, 320, 1, 0.5, "#B2C1DB");
         drawText("JUMP : TAP R AND L", WIDTH / 2, 360, 1, 0.5, "#B2C1DB");

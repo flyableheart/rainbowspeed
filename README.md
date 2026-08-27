@@ -1,4 +1,4 @@
-# Rainbow Rider
+# Rainbow Speed
 
 ![Banner](screenshots/banner.png)
 
@@ -28,7 +28,7 @@ Leap from cloud to cloud as a unicorn, weaving an unbroken rainbow trail. Dodge 
 
 ## Data Storage
 
-Best clear times (top 5) are saved to `localStorage` under the key `rainbowrider:t`.
+Best clear times (top 5) are saved to `localStorage` under the key `rainbowspeed:t`.
 
 ## Getting Started
 
@@ -42,7 +42,7 @@ bun run zip     # create zip and check size
 ## File Size
 
 - **Limit:** 13,312 bytes (13 KB)
-- **Current:** 13,298 bytes
+- **Current:** 13,294 bytes
 
 ## Tech Stack
 

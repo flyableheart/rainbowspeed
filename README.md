@@ -42,7 +42,7 @@ bun run zip     # create zip and check size
 ## File Size
 
 - **Limit:** 13,312 bytes (13 KB)
-- **Current:** 13,294 bytes
+- **Current:** 13,308 bytes
 
 ## Tech Stack
 

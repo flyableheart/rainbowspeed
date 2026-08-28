@@ -1,16 +1,18 @@
 import { zzfx } from "./zzfx";
 import { ATLAS, FONT_CHARS, SPRITE_START, FONT_START } from "./sprites";
 
+const W = window.Wavedash;
+
 let muted = false;
 const sfxJump = () => { if (!muted) zzfx(...([,,324,.01,.01,.09,1,2.3,10,-26,,,,.4,,,,.69,.03] as number[])); };
 const sfxStart = () => { if (!muted) zzfx(...([,,659,,.09,.09,5,.8,,,367,.05,.03,,,,,.98,.04] as number[])); };
 const sfxLevelUp = () => { if (!muted) zzfx(...([1.6,,642,,.29,.21,1,.3,,,358,.07,.04,.2,,,.1,.5,.24] as number[])); };
 const sfxExp = () => { if (!muted) zzfx(...([,,486,.02,.14,.09,,.9,-13,27,,,,,,,,.7,.09] as number[])); };
-const sfxHit = () => { if (!muted) zzfx(...([2,,134,.02,.04,.08,5,.8178692417324012,-5,,,,,.2,1.2,.2,.15,.55,.03] as number[])); };
+const sfxHit = () => { if (!muted) zzfx(...([2,,134,.02,.04,.08,5,.818,-5,,,,,.2,1.2,.2,.15,.55,.03] as number[])); };
 const sfxLand = () => { if (!muted) zzfx(...([,,90,.01,,.05,5,,,,,,,.1,-4,,.01,.1,.02] as number[])); };
 
 const WIDTH = 1560;
-const HEIGHT = 720;
+const HEIGHT = W ? 878 : 720;
 const GRAVITY = 0.5;
 const JUMP_POWER = 10;
 const PLAYER_WIDTH = 60;
@@ -139,28 +141,19 @@ function statsAt(level: number) {
   };
 }
 
-// Max horizontal range: (1 + airJumps) jumps worth of air time * speed
-function maxRange(level: number): number {
-  const s = statsAt(level);
-  const totalJumps = 1 + s.airJumps;
-  const airTime = totalJumps * (2 * JUMP_POWER / GRAVITY);
-  return airTime * s.speed;
-}
-
-// Difficulty: 0.91 at cloud 1, 0.95 at cloud 10
-function difficulty(i: number): number {
-  return 0.91 + i * (0.95 - 0.91) / (CLOUD_COUNT - 1);
-}
-
 // Jump height clamp: -PLAYER_HEIGHT * 1.5
 
 // Cloud checkpoints — sequential, gap between cloud i-1 and cloud i
+// maxRange(level): max horizontal distance = (1 + airJumps) * (2 * JUMP_POWER / GRAVITY) * speed
+// difficulty(i): 0.91 at cloud 1, 0.95 at cloud 10
 interface Cloud { x: number; y: number; width: number; level: number; }
 const clouds: Cloud[] = [];
 clouds.push({ x: 0, y: CLOUD_Y, width: CLOUD_WIDTH, level: 0 });
 let cloudX = CLOUD_WIDTH;
 for (let i = 0; i < CLOUD_COUNT; i++) {
-  const gap = maxRange(i) * difficulty(i);
+  // gap = maxRange(i) * difficulty(i)
+  const s = statsAt(i);
+  const gap = (1 + s.airJumps) * (2 * JUMP_POWER / GRAVITY) * s.speed * (0.91 + i * (0.95 - 0.91) / (CLOUD_COUNT - 1));
   cloudX += gap;
   clouds.push({
     x: cloudX,
@@ -246,7 +239,6 @@ function formatTime(ms: number): string {
   const mm = t / 6000 | 0;
   return `${mm < 10 ? "0" : ""}${mm}:${ss < 10 ? "0" : ""}${ss}:${cc < 10 ? "0" : ""}${cc}`;
 }
-
 
 function currentStats() {
   const s = statsAt(playerLevel);
@@ -432,6 +424,12 @@ function update() {
           sfxLevelUp();
           clearTime = performance.now() - startTime;
           cleared = true;
+          if (W) {
+            W.setAchievement("CLEAR");
+            if (clearTime < 300000) W.setAchievement("CLEAR_5MIN");
+            if (clearTime < 180000) W.setAchievement("CLEAR_3MIN");
+            if (clearTime < 120000) W.setAchievement("CLEAR_2MIN");
+          }
           const times: number[] = JSON.parse(localStorage.getItem("rainbowspeed:t") || "[]");
           times.push(clearTime);
           times.sort((a, b) => a - b);
@@ -619,14 +617,8 @@ function draw() {
   const now = performance.now();
   if (bgBlend < 0.001) {
     ctx.fillStyle = "#D4DDED";
-  } else if (clearTime > 0) {
-    const t = (startTime + clearTime) * 0.0008;
-    const cr = 212 + bgBlend * (30 * Math.sin(t) + 15) | 0;
-    const cg = 221 + bgBlend * (20 * Math.sin(t + 2.1) - 14) | 0;
-    const cb = 237 + bgBlend * (25 * Math.sin(t + 4.2) - 14) | 0;
-    ctx.fillStyle = `rgb(${cr},${cg},${cb})`;
   } else {
-    const t = now * 0.0008;
+    const t = (clearTime > 0 ? startTime + clearTime : now) * 0.0008;
     const cr = 212 + bgBlend * (30 * Math.sin(t) + 15) | 0;
     const cg = 221 + bgBlend * (20 * Math.sin(t + 2.1) - 14) | 0;
     const cb = 237 + bgBlend * (25 * Math.sin(t + 4.2) - 14) | 0;
@@ -881,4 +873,7 @@ function loop(now: number) {
   main();
 }
 
-spriteSheet.onload = () => requestAnimationFrame(loop);
+spriteSheet.onload = () => {
+  W?.init();
+  requestAnimationFrame(loop);
+};
